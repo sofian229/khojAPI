@@ -1,0 +1,75 @@
+import json
+from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
+from collections import Counter
+
+analyzer = SentimentIntensityAnalyzer()
+
+def score_sentiment(text: str) -> float:
+    if not text:
+        return 0.0
+    return analyzer.polarity_scores(text)["compound"]
+
+def get_price_band(businesses: list[dict]) -> str:
+    tier_counts = {"budget": 0, "mid-range": 0, "premium": 0}
+    for b in businesses:
+        tier = str(b.get("price_range", "")).lower()
+        if tier in tier_counts:
+            tier_counts[tier] += 1
+    return min(tier_counts, key=tier_counts.get)
+
+def get_competition_density(total: int) -> str:
+    if total < 5:
+        return "low"
+    elif total < 15:
+        return "medium"
+    return "high"
+
+def get_common_complaints(businesses: list[dict]) -> str:
+    all_complaints = []
+    for b in businesses:
+        complaints = b.get("top_complaints", [])
+        if isinstance(complaints, list):
+            all_complaints.extend(complaints)
+        elif isinstance(complaints, str):
+            try:
+                parsed = json.loads(complaints)
+                all_complaints.extend(parsed)
+            except Exception:
+                pass
+    if not all_complaints:
+        return "no complaints data available"
+    count = Counter(all_complaints)
+    top = [item for item, _ in count.most_common(3)]
+    return ", ".join(top)
+
+def run_analytics(businesses: list[dict]) -> dict:
+    if not businesses:
+        return {
+            "total_businesses": 0,
+            "avg_rating": 0.0,
+            "competition_density": "unknown",
+            "underserved_price_band": None,
+            "common_complaints": "No business data available for analysis.",
+        }
+    ratings = [b.get("rating") for b in businesses if b.get("rating")]
+    avg_rating = round(sum(ratings) / len(ratings), 2) if ratings else 0.0
+
+    for b in businesses:
+        reviews = b.get("reviews", [])
+        if isinstance(reviews, list):
+            complaints = b.get("top_complaints", [])
+            if isinstance(complaints, str):
+                import json
+                complaints = json.loads(complaints)
+            review_text = " ".join(complaints) if complaints else " ".join(reviews)
+        else:
+            review_text = ""
+        b["sentiment_score"] = score_sentiment(review_text)
+
+    return {
+        "total_businesses": len(businesses),
+        "avg_rating": avg_rating,
+        "competition_density": get_competition_density(len(businesses)),
+        "underserved_price_band": get_price_band(businesses),
+        "common_complaints": get_common_complaints(businesses)
+    }
