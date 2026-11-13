@@ -12,10 +12,8 @@ A local business intelligence agent for Indian markets. A multi-agent system tha
 ## 1. Problem Statement
 Open track. A founder looking to open a business in a specific locality has no way to find out all three in one go: market saturation, what customers are complaining about with existing players, and which price band is underserved. Manual research on Google would take hours. khojAPI solves this in under 60 seconds.
 
-## 2. Live Demo
-https://huggingface.co/spaces/quratulainnnnn/khojAPI
 
-## 4. Tech Stack
+## 2. Tech Stack
 - **Backend:** FastAPI, Python 3.11, SQLite, SQLAlchemy
 - **Agent layer:** Groq API, LLaMA 3.3 70B, Pydantic v2
 - **Crawling:** Google Places Text Search API, Google Places Details API
@@ -23,7 +21,7 @@ https://huggingface.co/spaces/quratulainnnnn/khojAPI
 - **Frontend:** HTML, CSS, vanilla JS
 - **Deployment:** Docker, HuggingFace Spaces
 
-## 5. Backend Architecture
+## 3. Backend Architecture
 Three agents with single responsibility:
 
 - **Crawler agent** — fetches businesses from Google Places Text Search, then calls Place Details API per business for reviews and phone number
@@ -38,7 +36,7 @@ Orchestrator chains them: crawl → extract → analyze → persist to SQLite. A
 - VADER over LLM for sentiment — free, local, instant, strong accuracy on short review text
 - Three agents over one — each is testable in isolation, single responsibility principle
 
-## 6. Implementation Approach & Workflow
+## 4. Implementation Approach & Workflow
 1. User submits city, locality, and category via the frontend or API
 2. `POST /analyze` creates a job in SQLite and returns a `job_id` immediately
 3. Background task fires the pipeline:
@@ -51,7 +49,7 @@ Orchestrator chains them: crawl → extract → analyze → persist to SQLite. A
 5. Once complete, `GET /report/{job_id}` returns the full structured report
 6. Frontend renders business cards, sentiment labels, metric boxes, and market opportunity banner
 
-## 7. Features & Functionalities
+## 5. Features & Functionalities
 - **Micro-locality search** — search by neighborhood, not just city
 - **Real review extraction** — up to 3 reviews per business from Google Places, sorted by relevance
 - **LLM-powered complaint extraction** — identifies what customers actually complain about
@@ -63,7 +61,7 @@ Orchestrator chains them: crawl → extract → analyze → persist to SQLite. A
 - **Underserved price band detection** — identifies which tier (budget/mid-range/premium) is missing
 - **Async job queue** — non-blocking, pollable via status endpoint
 
-## 8. API Endpoints
+## 6. API Endpoints
 - `POST /analyze` — body: city, locality, category — returns job_id
 - `GET /status/{job_id}` — returns pending/processing/complete
 - `GET /report/{job_id}` — returns full structured report
@@ -74,11 +72,11 @@ Orchestrator chains them: crawl → extract → analyze → persist to SQLite. A
 - **Groq API with LLaMA 3.3 70B** — structured extraction from raw data
 - **VADER** — local sentiment scoring, no API cost
 
-## 9. Installation Steps
+## 7. Installation Steps
 
 **With Docker:**
 ```bash
-git clone https://github.com/quratulain-nayeem/khojAPI
+git clone https://github.com/sofian229/khojAPI
 cd khojAPI
 cp .env.example .env  # add your API keys
 docker-compose up --build
@@ -86,7 +84,7 @@ docker-compose up --build
 
 **Without Docker:**
 ```bash
-git clone https://github.com/quratulain-nayeem/khojAPI
+git clone https://github.com/sofian229/khojAPI
 cd khojAPI
 python -m venv .venv
 .venv\Scripts\activate  # Windows
@@ -95,15 +93,15 @@ cp .env.example .env  # add your API keys
 uvicorn main:app --reload
 ```
 
-## 10.  Screenshots
-<img width="1915" height="982" alt="image" src="https://github.com/user-attachments/assets/a5290a11-0302-4ca2-92fc-3b07e72cf018" />
-<img width="1912" height="986" alt="image" src="https://github.com/user-attachments/assets/cfab425c-cb81-4360-89eb-429be3264fc1" />
+## 8.  Screenshots
+<img width="1915" height="982" alt="image" src="C:\Users\abdul\Downloads\khojAPI-main\khojAPI-main\screenshots\Screenshot 2026-11-10 234331.png" />
+<img width="1912" height="986" alt="image" src="C:\Users\abdul\Downloads\khojAPI-main\khojAPI-main\screenshots\Screenshot 2026-11-10 234510.png" />
 
 
-## 11. Known Limitations
+## 9. Known Limitations
 - Google Places returns a maximum of 3 reviews per business on the free tier, sorted by relevance. Businesses with no recent reviews will show empty complaints.
 - SQLite is used for this demo. A production version would use Postgres.
 - Complaint extraction depends on review availability — businesses with no Google reviews will show no complaints.
 
-## 12. Environment Variables Required
+## 10. Environment Variables Required
 Create a `.env` file based on `.env.example`:
